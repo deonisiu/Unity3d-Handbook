@@ -450,16 +450,21 @@ void OnAmmoExpired(){
 ``` C#
 // Перечисление определяет все возможные события
 // Дополнительные события должны добавляться сюда
-public enum EVENT_TYPE {GAME_INIT,
-												GAME_END,
-												AMMO_EMPTY,
-												HEALTH_CHANGE,
-												DEAD};
+public enum EVENT_TYPE {
+	GAME_INIT,
+	GAME_END,
+	AMMO_EMPTY,
+	HEALTH_CHANGE,
+	DEAD
+};
 //------------------------------------------------
 // Интерфейс Listener для реализации в классах получателей событий
 public interface IListener{
 	// Вызывается, когда возникает событие
-	void OnEvent(EVENT_TYPE Event_Type, Component Sender, Object Param = null);
+	void OnEvent(
+		EVENT_TYPE Event_Type, 
+		Component Sender, 
+		Object Param = null);
 }
 
 ```
@@ -471,8 +476,11 @@ public class MyCustomListener : MonoBehavior, IListener {
 	void Update() {}
 
 	// Реализовать функцию OnEvent для приема событий
-	public void OnEvent(EVENT_TYPE Event_type, 
-											Component Sender, Object Param = null) {
+	public void OnEvent(
+		EVENT_TYPE Event_type, 
+		Component Sender, 
+		Object Param = null) {
+
 		//....
 	}
 }
