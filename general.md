@@ -182,3 +182,104 @@ public class ExceptionLogger : MonoBehavior{
 
 Профайлер Unity помогает вам оптимизировать вашу игру. Он сообщает вам о том, как много времени тратится в различных областях вашей игры.
 
+## Функции поиска
+
+### Функция GetComponent
+[Documentation](https://docs.unity3d.com/ru/current/ScriptReference/GameObject.GetComponent.html)
+
+Функция получающая компонент объекта по его типу.
+``` C#
+Transform myTrans = GameObject.GetComponent<Transform> ();
+```
+
+### Функция GetComponents
+[Documentation](https://docs.unity3d.com/ru/current/ScriptReference/GameObject.GetComponents.html)
+
+Функция получает несколько компонентов по типу
+``` C#
+// Получить все компоненты
+private Component[] AllComp = null;
+
+void Start(){
+	// Получить список всех компонентов данного объекта
+	AllComp = GetComponents<Component> ();
+}
+```
+
+### Функции Find и FindWithTag
+[Documentation Find](https://docs.unity3d.com/ru/current/ScriptReference/GameObject.Find.html)
+[Documentation FindWithTag](https://docs.unity3d.com/ru/current/ScriptReference/GameObject.FindWithTag.html)
+
+Поиск объектов в сцене. Первый ищет по имени объекта, второй по тегу. ***Второй способ быстрее!***
+
+### Функция сравнения тегов CompareTag
+[Documentation GameObject](https://docs.unity3d.com/ru/current/ScriptReference/GameObject.html)
+``` C#
+gameObject.CompareTag(Obj2.tag);
+```
+
+### Функция сравнения двух объектов GetInstanceID
+[Documentation GameObject](https://docs.unity3d.com/ru/current/ScriptReference/GameObject.html)
+``` C#
+if(obj1.GetInstanceID() == obj2.GetInstanceID()){
+	...
+}
+```
+
+### Расстояние между двумя объектами
+[Documentation Vector3.Distance](https://docs.unity3d.com/ru/current/ScriptReference/Vector3.Distance.html)
+``` C#
+float distance = Vector3.Distance(obj1.transform.position, obj2.transofrm.position)
+```
+
+### Поиск объектов определенного типа
+***Не использовать в Update()***
+``` C#
+Collider[] Cols = Object.FindObjectsOfType<Collider>();
+```
+
+### Проверка препятствий между объектами
+[Documentation Physics.LineCast](https://docs.unity3d.com/ru/current/ScriptReference/Physics.Linecast.html)
+``` C#
+public LayerMask LM;
+
+void Update(){
+	if(!Physics.LineCast(obj1.transform.position, obj2.transform.position, LM)){
+		Debug.log("Препятствий нет");
+	}
+}
+
+// Показывать вспомогательную линию в режиме отладки
+void OnDrawGizmos(){
+	Gizmos.DrawLine(obj1.transform.position, obj2.transform.position);
+}
+```
+
+### Присоединение одного объекта к другому с помощью Transform
+``` C#
+childObj.transform.parent = parentObj.transform;
+```
+
+## Работа с кадрами в Unity
+Для работы с кадрами имеются три вида событий в любом классе MonoBehavior.
+- Update()
+- FixecUpdate()
+- LateUpdate()
+
+[Documentation Physics.LineCast](https://docs.unity3d.com/ru/current/ScriptReference/MonoBehavior.html)
+
+### Update
+Вызывается один раз для каждого кадра в каждом активном компоненте каждого активного объекта. Update соответствует понятию кадра в Unity. Используется для событий ввода: клавиатура, мышь. Очередность обработки Update не определена. Нельзя утверждать, что Update Х будет вызван раньше чем Update Y и наоборот.
+
+### FixedUpdate
+Не привязано к кадрам. Может вызываться несколько раз в кадре. Вызывается регулярно и нормированно, через фиксированные интервалы времени. Используется для эмуляции физических характеристик объектов(св-ва компонента RigidBody)
+
+### LateUpdate
+Вызывается в каждом кадре как и Update, но только после событий Update и FixedUpdate. Используется для изменения положения камеры, т.к. положение объекта уже было изменено в Update
+
+### Два важных правила в работе с кадрами
+1. Важно рационально относиться к Update и любым другим регулярным вызываемым событиям, связанным с кадрами. Они должны содержать только самый необходимый код. ***Серьезно уменьшить нагрузку на функции Update поможет событийное программирование.***
+2. Движение должно основываться на времени. То есть нужно писать код для реализации движений и изменений так, чтобы вне зависимости от частоты кадров они выглядели одинаково у всех игроков.***Для этого используется переменная Time.deltaTime***  
+`transform.localPosition += transform.forward * Speed * Time.deltaTime;`
+
+### Неуничтожаемые объекты
