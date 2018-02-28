@@ -11,4 +11,4 @@
 
 * [Общие заметки (То что ещё не сортировано)](general.md)
 * [Справочник по скриптам в Unity3d](Scripts/)
-* [Images](img/)
+* [Images](Images/)
