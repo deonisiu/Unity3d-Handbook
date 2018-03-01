@@ -486,4 +486,119 @@ public class MyCustomListener : MonoBehavior, IListener {
 }
 ```
 
-### EventManager(синглтон менеджер)
+### EventManager(класс диспетчер синглтон)
+Обязанностью диспетчера является вызов событий у получателей, когда события действительно происходят. Этот класс, будучи неуничтожаемым синглтоном, будет подключаться к пустому игровому объекту в сцене и непосредственно доступен для всех других объектов через статическое свойство.
+``` C#
+// Синглтон EventManager для отправки событий получателям
+// Работает с реализациями IListener
+public class EventManager : MonoBehavior {
+	#region свойства C#
+	//-----------------
+	// Общий доступ к экземпляру
+	public static EventManager Instance {
+		get {return instance;}
+		set{}
+	}
+	#endregion
+
+	#region переменные
+	// Экземпляр диспетчера событий (синглтон)
+	private static EventManager instance = null;
+
+	// Массив получателей (все зарегистрировавшиеся объекты)
+	private Dictionary<EVENT_TYPE, List<IListener>> Listeners = new Dictionary<EVENT_TYPE, List<IListener>>();
+	#endregion
+	//-------------
+	#region методы
+	// Вызывается перед началом работы для инициализации
+	void Awake() {
+		// Если экземпляр отсутствует, сохранить данный экземпляр
+		if (instance == null) {
+			instance = this;
+			DontDestroyOnLoad(gameObject);
+		} else {
+			DestroyImmediate(this);
+		}
+	}
+	//-----------------
+	/// <summary>
+	/// Функция добавления получателя в массив
+	/// </summary>
+	/// <param name="Event_Type">Событие, ожидаемое получателем</param>
+	/// <param name="Listener">Объект, ожидающий события</param>
+	public void AddListener(EVENT_TYPE Event_Type, IListener Listener) {
+		// Список получателей для данного события
+		List<IListener> ListenList = null;
+
+		// Проверить тип события. Если существует - добавить в список
+		if(Listeners.TryGetValue(Event_Type, out ListenList)) {
+			// Список существует, добавить новый элемент
+			ListenList.Add(Listener);
+			return;
+		}
+
+		// Иначе создать список как ключ словаря
+		ListenList = new List<IListener>();
+		ListenList.Add(Listener);
+		Listeners.Add(Event_Type, ListenList);
+	}
+	//---------------------
+	/// <summary>
+	/// Посылает события получателям
+	/// </summary>
+	/// <param name="Event_Type">Событие для вызова</param>
+	/// <param name="Sender">Вызываемый объект</param>
+	/// <param name="Param">Необязательный аргумент</param>
+	publuc void PostNotification(EVENT_TYPE, Event_Type, Component Sender, Object Param = null) {
+		// Послать событие всем получателям
+		// Список получателей только для данного события
+		List<IListener> ListenList = null;
+
+		// Если получателей нет - выйти
+		if(!Listeners.TryGetValue(Event_Type, out ListenList))
+			return;
+
+		// Получатели есть. Послать им событие
+		for(int i=0; i<ListenList.Count; i++) {
+			if(!ListenList[i].Equals(null))
+				ListenList[i].OnEvent(Event_Type, Sender, Param);
+		}
+	}
+	//------------------------
+	// Удаляет событие из словаря, включая всех получателей
+	public void RemoveEvent(EVENT_TYPE Event_Type) {
+		// Удалить запись из словаря
+		Listeners.Remove(Event_Type);
+	}
+	//---------------------------------
+	// Удаляет все избыточные записи из словаря
+	public void RemoveRedundancies() {
+		// Создать новый словарь
+		Dictionary<EVENT_TYPE, List<IListener>> TmpListeners = new Dictionary<EVENT_TYPE, List<IListener>>();
+
+		// Обойти все записи в словаре
+		foreach(LeyValuePair<EVENT_TYPE, List<IListener>> Item in Listeners) {
+			// Обойти всех получателей, удалить пустые ссылки
+			for(int i = Item.Value.Count-1; i>=0; i--){
+				// Если ссылка пустая, удалить элемент
+				if(Item.Value[i].Equals(null))
+					Item.Value.RemoveAt(i);
+			}
+
+			// Если в списке остались элементы, добавить его в словать tmp
+			if(Item.Value.Count > 0)
+				TmpListeners.Add (Item.Key, Item.Value);
+		}
+
+		// Заменить объект Listeners новым словарем
+		Listeners = TmpListeners;
+	}
+	//------------------
+	// Вызывается при смене сцены. Очищает словарь
+	void OnLeveWasLoaded() {
+		RemoveRedundancies ();
+	}
+	//--------------------
+	#endregion
+}
+```
