@@ -23,6 +23,7 @@
 ## Навигация
 
 * [Общие заметки (То что ещё не сортировано)](general.md)
+* [RiderSettings](RiderSettings/)
 * [Справочник по C#](UnityLang/)
 * [Справочник по скриптам в Unity3d](Scripts/)
 * [Images](Images/)
